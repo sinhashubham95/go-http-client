@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/cookiejar"
+	"net/http/httptrace"
 	"net/url"
 	"sync"
 	"time"
@@ -112,6 +113,10 @@ func (c *Client) Request(request *Request) (*http.Response, error) {
 
 	// fill the request-id header for log tracing
 	request.SetHeaderParam(requestIDHeader, getRequestID(request.ctx))
+
+	if client.requestConfig.isNetTraceEnabled {
+		request.ctx = httptrace.WithClientTrace(request.ctx, c.getHTTPTracer(request.ctx))
+	}
 
 	// start the timer
 	start := time.Now()

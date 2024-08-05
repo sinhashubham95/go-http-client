@@ -30,6 +30,7 @@ type RequestConfig struct {
 	transport             http.RoundTripper
 	headers               map[string]string
 	checkRedirect         func(*http.Request, []*http.Request) error
+	isNetTraceEnabled     bool
 }
 
 // NewRequestConfig is used to create a new request configuration from a map of configurations.
@@ -112,6 +113,8 @@ func NewRequestConfig(name string, configMap map[string]interface{}) *RequestCon
 		tlsMinVersion, _ := getConfigOptionString(configMap, "tlsminversion")
 
 		tlsInsecureSkipVerify, _ := getConfigOptionBool(configMap, "tlsinsecureskipverify")
+
+		rc.isNetTraceEnabled, _ = getConfigOptionBool(configMap, "isnettraceenabled")
 
 		var tlsConfig *tls.Config
 		switch tlsMinVersion {
