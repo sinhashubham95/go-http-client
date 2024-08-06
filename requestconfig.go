@@ -30,6 +30,7 @@ type RequestConfig struct {
 	transport             http.RoundTripper
 	headers               map[string]string
 	checkRedirect         func(*http.Request, []*http.Request) error
+	isNetTraceEnabled     bool
 }
 
 // NewRequestConfig is used to create a new request configuration from a map of configurations.
@@ -111,6 +112,10 @@ func NewRequestConfig(name string, configMap map[string]interface{}) *RequestCon
 
 		tlsMinVersion, _ := getConfigOptionString(configMap, "tlsminversion")
 
+		tlsInsecureSkipVerify, _ := getConfigOptionBool(configMap, "tlsinsecureskipverify")
+
+		rc.isNetTraceEnabled, _ = getConfigOptionBool(configMap, "isnettraceenabled")
+
 		var tlsConfig *tls.Config
 		switch tlsMinVersion {
 		case "1.0":
@@ -122,8 +127,9 @@ func NewRequestConfig(name string, configMap map[string]interface{}) *RequestCon
 		case "1.3":
 			tlsConfig = &tls.Config{MinVersion: tls.VersionTLS13}
 		default:
-			tlsConfig = nil
+			tlsConfig = &tls.Config{}
 		}
+		tlsConfig.InsecureSkipVerify = tlsInsecureSkipVerify
 
 		// Setting Default Transport.
 		dialer := &net.Dialer{
@@ -302,5 +308,15 @@ func getConfigOptionString(options map[string]interface{}, key string) (string, 
 		return cast.ToStringE(val)
 	} else {
 		return s, fmt.Errorf("missing %s", key)
+	}
+}
+
+func getConfigOptionBool(options map[string]interface{}, key string) (bool, error) {
+	var val interface{}
+	var b, ok bool
+	if val, ok = options[key]; ok {
+		return cast.ToBoolE(val)
+	} else {
+		return b, fmt.Errorf("missing %s", key)
 	}
 }

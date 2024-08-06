@@ -8,13 +8,14 @@ import (
 	"log"
 	"net/http"
 	"net/http/cookiejar"
+	"net/http/httptrace"
 	"net/url"
 	"sync"
 	"time"
 
-	"github.com/gojek/heimdall"
-	"github.com/gojek/heimdall/httpclient"
-	"github.com/gojek/heimdall/hystrix"
+	"github.com/gojek/heimdall/v7"
+	"github.com/gojek/heimdall/v7/httpclient"
+	"github.com/gojek/heimdall/v7/hystrix"
 	"github.com/google/uuid"
 	"golang.org/x/net/publicsuffix"
 )
@@ -112,6 +113,10 @@ func (c *Client) Request(request *Request) (*http.Response, error) {
 
 	// fill the request-id header for log tracing
 	request.SetHeaderParam(requestIDHeader, getRequestID(request.ctx))
+
+	if client.requestConfig.isNetTraceEnabled {
+		request.ctx = httptrace.WithClientTrace(request.ctx, c.getHTTPTracer(request.ctx))
+	}
 
 	// start the timer
 	start := time.Now()
