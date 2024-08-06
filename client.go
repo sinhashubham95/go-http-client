@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gojek/heimdall"
-	"github.com/gojek/heimdall/httpclient"
-	"github.com/gojek/heimdall/hystrix"
+	"github.com/gojek/heimdall/v7"
+	"github.com/gojek/heimdall/v7/httpclient"
+	"github.com/gojek/heimdall/v7/hystrix"
 	"github.com/google/uuid"
 	"golang.org/x/net/publicsuffix"
 )
